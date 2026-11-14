@@ -1,16 +1,18 @@
-"""Step 4 - feature engineering, part 1 (features that need no text parsing).
+"""Step 4 - feature engineering (features that need no free-text parsing).
 
 Reads data/processed/transactions_clean.parquet in batches and writes
 data/processed/transactions_features.parquet = every clean column, untouched,
 plus the new feature columns listed in FEATURES below.
 
 Groups built here:
-  time    - calendar parts of epoch_seconds, all in UTC
-  parties - ordering/beneficiary type pair
-  amount  - log scale, order of magnitude, whole-dollar flag
+  time      - calendar parts of epoch_seconds, all in UTC
+  parties   - ordering/beneficiary type pair
+  amount    - log scale, order of magnitude, whole-dollar flag
+  geography - sender/receiver bank country (from the BIC8), domestic flag, corridor
+  routing   - parsed bic8_path: entries, gaps, endpoint mismatches
 
-Groups that depend on the text columns (geography, routing, accounts, tokens,
-anomaly signatures) are added later, once their formats are confirmed by EDA.
+Groups that depend on the free-text columns (accounts, tokens, anomaly
+signatures) are added later, once their formats are confirmed by EDA.
 """
 import numpy as np
 import pandas as pd
@@ -45,8 +47,25 @@ FEATURES = [
     ("usd_amount_magnitude", pa.int8(), "amount", "usd_amount",
      "Order of magnitude: largest k with 10^k <= usd_amount (0.01 -> -2, 999.99 -> 2, 1000 -> 3)"),
     ("usd_amount_is_whole", pa.bool_(), "amount", "usd_amount", "True when usd_amount has no cents (e.g. 500.00)"),
+    ("sender_country", DICT, "geography", "ordering_bic8",
+     "Country of the sending bank: characters 5-6 of ordering_bic8 (0621US30 -> US)"),
+    ("receiver_country", DICT, "geography", "beneficiary_bic8",
+     "Country of the receiving bank: characters 5-6 of beneficiary_bic8"),
+    ("is_domestic", pa.bool_(), "geography", "sender_country + receiver_country",
+     "True when the sending and receiving banks are in the same country"),
+    ("country_corridor", DICT, "geography", "sender_country + receiver_country",
+     "Sender country -> receiver country, e.g. US->GB"),
+    ("path_entries", pa.int8(), "routing", "bic8_path",
+     "Number of entries in bic8_path; each '...' gap counts as one entry"),
+    ("path_gaps", pa.int8(), "routing", "bic8_path",
+     "Number of '...' gap entries in bic8_path (0 when continuity_qflag is true)"),
+    ("path_first_differs", pa.bool_(), "routing", "bic8_path + ordering_bic8",
+     "True when the first bank in bic8_path is not ordering_bic8"),
+    ("path_last_differs", pa.bool_(), "routing", "bic8_path + beneficiary_bic8",
+     "True when the last bank in bic8_path is not beneficiary_bic8"),
 ]
-REQUIRED = ["epoch_seconds", "ordering_type", "beneficiary_type", "usd_amount"]
+REQUIRED = ["epoch_seconds", "ordering_type", "beneficiary_type", "usd_amount",
+            "ordering_bic8", "beneficiary_bic8", "bic8_path"]
 
 
 def build(table: pa.Table) -> dict[str, pa.Array]:
@@ -80,6 +99,33 @@ def build(table: pa.Table) -> dict[str, pa.Array]:
     out["usd_amount_log10"] = pa.array(log10, mask=~positive)
     out["usd_amount_magnitude"] = pa.array(magnitude.astype("int8"), mask=~positive)
     out["usd_amount_is_whole"] = pa.array(np.round(amount * 100) % 100 == 0, mask=np.isnan(amount))
+
+    # geography: the country is characters 5-6 of the BIC8 (0-based slice 4:6), e.g. 0621US30 -> US
+    obic = table["ordering_bic8"].combine_chunks()
+    bbic = table["beneficiary_bic8"].combine_chunks()
+    sender = pc.utf8_slice_codeunits(obic, 4, 6)
+    receiver = pc.utf8_slice_codeunits(bbic, 4, 6)
+    out["sender_country"] = sender.dictionary_encode()
+    out["receiver_country"] = receiver.dictionary_encode()
+    out["is_domestic"] = pc.equal(sender, receiver)
+    out["country_corridor"] = pc.binary_join_element_wise(sender, receiver, "->").dictionary_encode()
+
+    # routing: bic8_path is "BIC;BIC;...;BIC" where "..." marks a gap in the observed route
+    path = table["bic8_path"].combine_chunks()
+    if path.null_count:
+        raise SystemExit(f"\nbic8_path has {path.null_count} missing values - routing features expect none")
+    parts = pc.split_pattern(path, ";")
+    flat = pc.list_flatten(parts)
+    offsets = parts.offsets.to_numpy()
+    offsets = offsets - offsets[0]
+    is_gap = pc.equal(flat, "...").to_numpy(zero_copy_only=False)
+    gaps = np.add.reduceat(is_gap.astype(np.int64), offsets[:-1]) if len(path) else np.array([], dtype=np.int64)
+    first = flat.take(pa.array(offsets[:-1]))
+    last = flat.take(pa.array(offsets[1:] - 1))
+    out["path_entries"] = pc.list_value_length(parts).cast(pa.int8())
+    out["path_gaps"] = pa.array(gaps.astype("int8"))
+    out["path_first_differs"] = pc.not_equal(first, obic)
+    out["path_last_differs"] = pc.not_equal(last, bbic)
     return out
 
 

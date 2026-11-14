@@ -10,3 +10,11 @@ party_pair,parties,"dictionary<values=string, indices=int32, ordered=0>",orderin
 usd_amount_log10,amount,double,usd_amount,log10 of usd_amount (missing if the amount is not above 0)
 usd_amount_magnitude,amount,int8,usd_amount,"Order of magnitude: largest k with 10^k <= usd_amount (0.01 -> -2, 999.99 -> 2, 1000 -> 3)"
 usd_amount_is_whole,amount,bool,usd_amount,True when usd_amount has no cents (e.g. 500.00)
+sender_country,geography,"dictionary<values=string, indices=int32, ordered=0>",ordering_bic8,Country of the sending bank: characters 5-6 of ordering_bic8 (0621US30 -> US)
+receiver_country,geography,"dictionary<values=string, indices=int32, ordered=0>",beneficiary_bic8,Country of the receiving bank: characters 5-6 of beneficiary_bic8
+is_domestic,geography,bool,sender_country + receiver_country,True when the sending and receiving banks are in the same country
+country_corridor,geography,"dictionary<values=string, indices=int32, ordered=0>",sender_country + receiver_country,"Sender country -> receiver country, e.g. US->GB"
+path_entries,routing,int8,bic8_path,Number of entries in bic8_path; each '...' gap counts as one entry
+path_gaps,routing,int8,bic8_path,Number of '...' gap entries in bic8_path (0 when continuity_qflag is true)
+path_first_differs,routing,bool,bic8_path + ordering_bic8,True when the first bank in bic8_path is not ordering_bic8
+path_last_differs,routing,bool,bic8_path + beneficiary_bic8,True when the last bank in bic8_path is not beneficiary_bic8
