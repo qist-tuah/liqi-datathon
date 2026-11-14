@@ -22,8 +22,9 @@ import pyarrow.parquet as pq
 
 from . import settings as S
 
-FEATURES_PARQUET = S.PROCESSED_DIR / "transactions_features.parquet"
-FEATURE_DICTIONARY_CSV = S.PROFILE_DIR / "feature_dictionary.csv"
+# The paths live in settings.py; these names are kept so existing notebooks keep working.
+FEATURES_PARQUET = S.FEATURES_PARQUET
+FEATURE_DICTIONARY_CSV = S.FEATURE_DICTIONARY_CSV
 
 WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 PAIRS = ["B2B", "B2C", "C2B", "C2C"]
@@ -68,6 +69,17 @@ REQUIRED = ["epoch_seconds", "ordering_type", "beneficiary_type", "usd_amount",
             "ordering_bic8", "beneficiary_bic8", "bic8_path"]
 
 
+def as_text(column: pa.ChunkedArray) -> pa.Array:
+    """One column as plain strings, whether the clean file stores it as text or as a category.
+
+    The clean step turns a text column into a category when it has few distinct
+    values (clean.category_max_distinct), and the string functions used below
+    do not accept category input.
+    """
+    array = column.combine_chunks()
+    return array.cast(pa.string()) if pa.types.is_dictionary(array.type) else array
+
+
 def build(table: pa.Table) -> dict[str, pa.Array]:
     """Compute every feature for one batch. Input columns are not modified."""
     out = {}
@@ -101,8 +113,8 @@ def build(table: pa.Table) -> dict[str, pa.Array]:
     out["usd_amount_is_whole"] = pa.array(np.round(amount * 100) % 100 == 0, mask=np.isnan(amount))
 
     # geography: the country is characters 5-6 of the BIC8 (0-based slice 4:6), e.g. 0621US30 -> US
-    obic = table["ordering_bic8"].combine_chunks()
-    bbic = table["beneficiary_bic8"].combine_chunks()
+    obic = as_text(table["ordering_bic8"])
+    bbic = as_text(table["beneficiary_bic8"])
     sender = pc.utf8_slice_codeunits(obic, 4, 6)
     receiver = pc.utf8_slice_codeunits(bbic, 4, 6)
     out["sender_country"] = sender.dictionary_encode()
@@ -111,7 +123,7 @@ def build(table: pa.Table) -> dict[str, pa.Array]:
     out["country_corridor"] = pc.binary_join_element_wise(sender, receiver, "->").dictionary_encode()
 
     # routing: bic8_path is "BIC;BIC;...;BIC" where "..." marks a gap in the observed route
-    path = table["bic8_path"].combine_chunks()
+    path = as_text(table["bic8_path"])
     if path.null_count:
         raise SystemExit(f"\nbic8_path has {path.null_count} missing values - routing features expect none")
     parts = pc.split_pattern(path, ";")
@@ -184,4 +196,4 @@ def run() -> None:
     with_nulls = {n: v for n, v in nulls.items() if v}
     print("Missing values in new features:", with_nulls if with_nulls else "none")
     print(f"Saved -> {FEATURES_PARQUET.relative_to(S.ROOT)}")
-    print(f"Feature dictionary -> {FEATURE_DICTIONARY_CSV.relative_to(S.ROOT)}")
+    print(f"Feature dictionary -> {FEATURE_DICTIONARY_CSV.relative_to(S.ROOT)}")

@@ -1,10 +1,10 @@
-"""Single entry point.  Usage:  python run_pipeline.py [convert|profile|clean|all]"""
+"""Single entry point.  Usage:  python run_pipeline.py [convert|profile|clean|features|all]"""
 import argparse
 import time
 
-from src import clean, convert, profiling
+from src import clean, convert, features, profiling
 
-STEPS = {"convert": convert.run, "profile": profiling.run, "clean": clean.run}
+STEPS = {"convert": convert.run, "profile": profiling.run, "clean": clean.run, "features": features.run}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)

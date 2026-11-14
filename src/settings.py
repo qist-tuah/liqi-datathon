@@ -8,14 +8,18 @@ RAW_DIR = ROOT / "data" / "raw"
 INTERIM_DIR = ROOT / "data" / "interim"
 PROCESSED_DIR = ROOT / "data" / "processed"
 PROFILE_DIR = ROOT / "reports" / "profiling"
+FIGURES_DIR = ROOT / "reports" / "figures"
 
 RAW_PARQUET = INTERIM_DIR / "transactions_raw.parquet"
 CLEAN_PARQUET = PROCESSED_DIR / "transactions_clean.parquet"
+FEATURES_PARQUET = PROCESSED_DIR / "transactions_features.parquet"
 COLUMN_MAPPING_CSV = PROFILE_DIR / "column_mapping.csv"
 PROFILE_JSON = PROFILE_DIR / "profile.json"
 PROFILE_CSV = PROFILE_DIR / "profile_summary.csv"
 TYPE_PLAN_CSV = PROFILE_DIR / "type_plan.csv"
 CLEAN_SUMMARY_CSV = PROFILE_DIR / "clean_summary.csv"
+FEATURE_DICTIONARY_CSV = PROFILE_DIR / "feature_dictionary.csv"
+DUCKDB_TMP_DIR = INTERIM_DIR / "duckdb_tmp"  # DuckDB spill-to-disk space (gitignored)
 
 
 def load_config() -> dict:
