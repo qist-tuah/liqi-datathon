@@ -1,0 +1,12 @@
+feature,group,type,source,description
+utc_date,time,date32[day],epoch_seconds,Calendar date of the payment in UTC
+utc_month,time,int8,epoch_seconds,Month number 1-12 in UTC
+utc_iso_week,time,int8,epoch_seconds,ISO 8601 week number in UTC (weeks start on Monday)
+utc_weekday,time,int8,epoch_seconds,Day of week in UTC: 0 = Monday ... 6 = Sunday
+utc_weekday_name,time,"dictionary<values=string, indices=int32, ordered=0>",epoch_seconds,Day of week in UTC as Mon ... Sun
+utc_is_weekend,time,bool,epoch_seconds,True when the UTC day is Saturday or Sunday
+utc_hour,time,int8,epoch_seconds,Hour of day 0-23 in UTC
+party_pair,parties,"dictionary<values=string, indices=int32, ordered=0>",ordering_type + beneficiary_type,"Sender type to receiver type: B2B, B2C, C2B or C2C (B = business, C = consumer)"
+usd_amount_log10,amount,double,usd_amount,log10 of usd_amount (missing if the amount is not above 0)
+usd_amount_magnitude,amount,int8,usd_amount,"Order of magnitude: largest k with 10^k <= usd_amount (0.01 -> -2, 999.99 -> 2, 1000 -> 3)"
+usd_amount_is_whole,amount,bool,usd_amount,True when usd_amount has no cents (e.g. 500.00)
