@@ -1,0 +1,22 @@
+column,type,missing,missing_pct,reason
+disclaimer,category,9999999,100.0,1 distinct text values
+epoch_seconds,datetime_s,0,0.0,all values fall in the Unix-seconds range 2000-2100
+currency_code,string,0,0.0,free text / identifier
+usd_amount,float,0,0.0,all values are numeric
+ordering_bic8,string,0,0.0,free text / identifier
+beneficiary_bic8,string,0,0.0,free text / identifier
+bic8_path,string,0,0.0,free text / identifier
+total_duration,int,0,0.0,all values are integers
+continuity_qflag,bool,0,0.0,only Y/N values
+currency_conversion_count,int,0,0.0,all values are integers
+participant_count,int,0,0.0,all values are integers
+transaction_type_code,category,0,0.0,3 distinct text values
+ordering_account,string,0,0.0,free text / identifier
+beneficiary_account,string,0,0.0,free text / identifier
+ordering_details,string,0,0.0,free text / identifier
+ordering_tokens,string,0,0.0,free text / identifier
+beneficiary_details,string,0,0.0,free text / identifier
+beneficiary_tokens,string,0,0.0,free text / identifier
+ordering_type,category,0,0.0,2 distinct text values
+beneficiary_type,category,0,0.0,2 distinct text values
+anomaly_type,category,9992994,99.9299,6 distinct text values

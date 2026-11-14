@@ -1,0 +1,22 @@
+column,output_name,type,reason
+disclaimer,disclaimer,category,1 distinct text values
+epoch_seconds,epoch_seconds,datetime_s,all values fall in the Unix-seconds range 2000-2100
+currency_code,currency_code,string,free text / identifier
+usd_amount,usd_amount,float,all values are numeric
+ordering_bic8,ordering_bic8,string,free text / identifier
+beneficiary_bic8,beneficiary_bic8,string,free text / identifier
+bic8_path,bic8_path,string,free text / identifier
+total_duration,total_duration,int,all values are integers
+continuity_qflag,continuity_qflag,bool,only Y/N values
+currency_conversion_count,currency_conversion_count,int,all values are integers
+participant_count,participant_count,int,all values are integers
+transaction_type_code,transaction_type_code,category,3 distinct text values
+ordering_account,ordering_account,string,free text / identifier
+beneficiary_account,beneficiary_account,string,free text / identifier
+ordering_details,ordering_details,string,free text / identifier
+ordering_tokens,ordering_tokens,string,free text / identifier
+beneficiary_details,beneficiary_details,string,free text / identifier
+beneficiary_tokens,beneficiary_tokens,string,free text / identifier
+ordering_type,ordering_type,category,2 distinct text values
+beneficiary_type,beneficiary_type,category,2 distinct text values
+anomaly_type,anomaly_type,category,6 distinct text values

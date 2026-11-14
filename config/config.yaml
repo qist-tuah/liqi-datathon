@@ -14,7 +14,7 @@ profile:
 
 clean:
   category_max_distinct: 50     # text columns with <= this many distinct values become category
-  drop_columns: []              # e.g. [col_00]
+  drop_columns: [disclaimer]    # removed from the clean file only; still kept in data/interim
   rename: {}                    # applied last, e.g. {col_01: timestamp}
   force_types: {}               # override inference, e.g. {ordering_bic: string}
                                 # allowed: string | int | float | bool | category | datetime_s | datetime_ms
