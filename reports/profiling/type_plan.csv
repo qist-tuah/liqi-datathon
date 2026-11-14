@@ -1,5 +1,5 @@
 column,output_name,type,reason
-disclaimer,disclaimer,category,1 distinct text values
+disclaimer,,DROPPED,clean.drop_columns
 epoch_seconds,epoch_seconds,datetime_s,all values fall in the Unix-seconds range 2000-2100
 currency_code,currency_code,string,free text / identifier
 usd_amount,usd_amount,float,all values are numeric

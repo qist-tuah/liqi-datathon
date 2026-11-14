@@ -1,5 +1,4 @@
 column,type,missing,missing_pct,reason
-disclaimer,category,9999999,100.0,1 distinct text values
 epoch_seconds,datetime_s,0,0.0,all values fall in the Unix-seconds range 2000-2100
 currency_code,string,0,0.0,free text / identifier
 usd_amount,float,0,0.0,all values are numeric
