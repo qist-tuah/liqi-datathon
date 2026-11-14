@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+# data and model artefacts are never committed (keep the folders via .gitkeep)
+data/raw/*
+data/interim/*
+data/processed/*
+models/*
+!**/.gitkeep

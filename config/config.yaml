@@ -1,0 +1,21 @@
+# All pipeline settings live here. Column names below always mean the
+# NORMALISED names (lower snake_case) listed in reports/profiling/column_mapping.csv.
+
+raw:
+  file: null            # file name inside data/raw/. null = use the only .csv found there
+  delimiter: null       # null = auto-detect from the header line ("," ";" "\t" "|")
+  encoding: utf-8-sig   # utf-8-sig also handles a BOM. If decoding fails, try cp1252
+  chunk_rows: 250000    # rows held in memory at a time. Lower this if RAM runs out
+
+profile:
+  max_distinct_tracked: 50000   # per column; above this, distinct is reported as ">50000"
+  top_n: 15                     # most frequent values kept per column
+  count_duplicates: true        # exact duplicate rows (reported only, never dropped)
+
+clean:
+  category_max_distinct: 50     # text columns with <= this many distinct values become category
+  drop_columns: []              # e.g. [col_00]
+  rename: {}                    # applied last, e.g. {col_01: timestamp}
+  force_types: {}               # override inference, e.g. {ordering_bic: string}
+                                # allowed: string | int | float | bool | category | datetime_s | datetime_ms
+  label_column: anomaly_type    # if present, adds is_anomaly (1 = label not empty). null = skip
