@@ -1,0 +1,26 @@
+rule,statement,unit,tested,exceptions,pct_following_rule,verdict
+H-S1,continuity_qflag = N exactly when the path has a gap,rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S2,participant_count = path entries - gaps,rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S3,Direct exactly when 2 banks,rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S4,a gap is never the first or last path entry,rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S5,every BIC is 4 digits + 2 letters + 2 characters,rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S10,currency conversions <= banks - 1,rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S6,each ordering account belongs to one bank,accounts,391132,0,100.0,"holds, 0 exceptions"
+H-S13,each ordering account has one party type,accounts,391132,0,100.0,"holds, 0 exceptions"
+H-S6,each beneficiary account belongs to one bank,accounts,2590877,61606,97.62219510999557,partly holds
+H-S13,each beneficiary account has one party type,accounts,2590877,0,100.0,"holds, 0 exceptions"
+H-S13,an account has the same party type as sender and as receiver,account pairs,254085,128261,49.52043607454198,rejected
+H-S7,ordering IBAN embeds the country and 4-digit code of ordering_bic8,IBAN rows,5442631,0,100.0,"holds, 0 exceptions"
+H-S7,beneficiary IBAN embeds the country and 4-digit code of beneficiary_bic8,IBAN rows,5405035,0,100.0,"holds, 0 exceptions"
+H-S12,ordering IBAN check digits are valid (mod 97),distinct IBAN accounts,111194,110100,0.9838660359371971,rejected
+H-S12,beneficiary IBAN check digits are valid (mod 97),distinct IBAN accounts,1355669,1341656,1.0336593962095435,rejected
+H-S8,ordering: line 1 is exactly /account,rows,10000000,1356368,86.43632,partly holds
+H-S8 refined,"ordering: line 1 is /account or //account, or there is no account line",rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S8,beneficiary: line 1 is exactly /account,rows,10000000,1468742,85.31258,partly holds
+H-S8 refined,"beneficiary: line 1 is /account or //account, or there is no account line",rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S9,ordering: no details line is longer than 35 characters,rows,10000000,3053,99.96947,holds with rare exceptions
+H-S9,beneficiary: no details line is longer than 35 characters,rows,10000000,7318,99.92682,holds with rare exceptions
+H-S11,ordering: tokens and details have the same number of lines,rows,10000000,6344427,36.55573,rejected
+H-S11,beneficiary: tokens and details have the same number of lines,rows,10000000,6528322,34.71678,rejected
+H-S14,"usd_amount is a plain number with at most 2 decimals, at least 0.01",rows,10000000,0,100.0,"holds, 0 exceptions"
+H-S14,no two rows are identical in every column,rows,10000000,1,99.99999,holds with rare exceptions
